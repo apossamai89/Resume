@@ -1,0 +1,14 @@
+# dependencies
+node_modules/
+
+# Next.js build output
+.next/
+out/
+
+# misc
+package-lock.json
+.DS_Store
+*.pem
+.env
+.env.local
+.env.*.local
