@@ -1,8 +1,5 @@
 "use client";
-import { useState, useRef, useEffect } from "react";
 import styles from "./page.module.css";
-
-type Message = { role: "user" | "assistant"; content: string };
 
 const ROLES = [
   {
@@ -80,56 +77,12 @@ const STATS = [
   { value: "898%", label: "YoY revenue growth" },
 ];
 
-const SUGGESTED = [
-  "What's her biggest career achievement?",
-  "What ABM tools does she know?",
-  "Tell me about her AI experience",
-  "Has she spoken publicly?",
-];
-
 export default function Home() {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [chatOpen, setChatOpen] = useState(false);
-  const bottomRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
-
-  async function send(text?: string) {
-    const content = text || input.trim();
-    if (!content) return;
-    const next: Message[] = [...messages, { role: "user", content }];
-    setMessages(next);
-    setInput("");
-    setLoading(true);
-    try {
-      const res = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: next }),
-      });
-      const data = await res.json();
-      setMessages([...next, { role: "assistant", content: data.reply }]);
-    } catch {
-      setMessages([
-        ...next,
-        { role: "assistant", content: "Something went wrong. Try again." },
-      ]);
-    } finally {
-      setLoading(false);
-    }
-  }
-
   return (
     <main className={styles.main}>
-      {/* Decorative background elements */}
       <div className={styles.bgCircle1} />
       <div className={styles.bgCircle2} />
 
-      {/* Header */}
       <header className={styles.header}>
         <div className={styles.headerInner}>
           <div className={styles.nameBlock}>
@@ -158,9 +111,7 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Body */}
       <div className={styles.body}>
-        {/* Left: Experience */}
         <section className={styles.experience}>
           <h2 className={styles.sectionTitle}>Experience</h2>
           <div className={styles.timeline}>
@@ -182,9 +133,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Right: sidebar */}
         <aside className={styles.sidebar}>
-          {/* Education */}
           <div className={styles.sideCard}>
             <h2 className={styles.sideTitle}>Education</h2>
             <p className={styles.sideHeading}>Bachelor of Commerce</p>
@@ -192,7 +141,6 @@ export default function Home() {
             <p className={styles.sideBadge}>Graduated with Distinction</p>
           </div>
 
-          {/* Skills */}
           <div className={styles.sideCard}>
             <h2 className={styles.sideTitle}>Tools & Skills</h2>
             <div className={styles.skillPills}>
@@ -202,7 +150,6 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Visibility */}
           <div className={styles.sideCard}>
             <h2 className={styles.sideTitle}>Industry Visibility</h2>
             <ul className={styles.visibilityList}>
@@ -213,69 +160,8 @@ export default function Home() {
               <li>🎙 Guest — "Let's Talk ABM" podcast</li>
             </ul>
           </div>
-
-          {/* AI Chat CTA */}
-          <button className={styles.chatCta} onClick={() => setChatOpen(true)}>
-            <span className={styles.ctaIcon}>✦</span>
-            <span>Ask me anything about Alessandra</span>
-          </button>
         </aside>
       </div>
-
-      {/* Chat panel */}
-      {chatOpen && (
-        <div className={styles.chatOverlay} onClick={(e) => { if (e.target === e.currentTarget) setChatOpen(false); }}>
-          <div className={styles.chatPanel}>
-            <div className={styles.chatHeader}>
-              <div>
-                <p className={styles.chatTitle}>Ask Alessandra's AI</p>
-                <p className={styles.chatSub}>Powered by Claude</p>
-              </div>
-              <button className={styles.closeBtn} onClick={() => setChatOpen(false)}>✕</button>
-            </div>
-
-            <div className={styles.chatMessages}>
-              {messages.length === 0 && (
-                <div className={styles.emptyState}>
-                  <p>Ask anything about Alessandra's background, achievements, or skills.</p>
-                  <div className={styles.suggestedGrid}>
-                    {SUGGESTED.map((q) => (
-                      <button key={q} className={styles.suggestedBtn} onClick={() => send(q)}>{q}</button>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {messages.map((m, i) => (
-                <div key={i} className={m.role === "user" ? styles.userMsg : styles.assistantMsg}>
-                  {m.content}
-                </div>
-              ))}
-              {loading && <div className={styles.assistantMsg}>
-                <span className={styles.typingDots}><span /><span /><span /></span>
-              </div>}
-              <div ref={bottomRef} />
-            </div>
-
-            <div className={styles.chatInputRow}>
-              <input
-                className={styles.chatInput}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && send()}
-                placeholder="Ask a question…"
-              />
-              <button className={styles.sendBtn} onClick={() => send()} disabled={loading}>→</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Floating chat button */}
-      {!chatOpen && (
-        <button className={styles.floatingChat} onClick={() => setChatOpen(true)}>
-          <span>✦ Ask AI</span>
-        </button>
-      )}
     </main>
   );
 }
