@@ -15,6 +15,7 @@
   background: radial-gradient(circle, #f0e0d6 0%, transparent 70%);
   pointer-events: none;
   z-index: 0;
+  animation: drift1 20s ease-in-out infinite;
 }
 .bgCircle2 {
   position: fixed;
@@ -26,6 +27,7 @@
   background: radial-gradient(circle, #d8e8e0 0%, transparent 70%);
   pointer-events: none;
   z-index: 0;
+  animation: drift2 25s ease-in-out infinite;
 }
 
 /* Header */
@@ -35,6 +37,7 @@
   background: var(--warm-white);
   border-bottom: 1px solid var(--sand);
   padding: 56px 48px 48px;
+  box-shadow: 0 4px 24px rgba(61, 43, 31, 0.04);
 }
 .headerInner {
   max-width: 1100px;
@@ -46,6 +49,8 @@
   flex-wrap: wrap;
 }
 .nameBlock { flex: 1; min-width: 260px; }
+
+/* Header entrance animations */
 .eyebrow {
   font-family: var(--font-body);
   font-size: 11px;
@@ -54,6 +59,11 @@
   color: var(--terracotta);
   font-weight: 500;
   margin-bottom: 12px;
+  opacity: 0;
+  transform: translateY(12px);
+}
+.nameVisible .eyebrow {
+  animation: fadeUp 0.4s ease 0s forwards;
 }
 .name {
   font-family: var(--font-display);
@@ -62,12 +72,22 @@
   line-height: 1.05;
   color: var(--bark);
   margin-bottom: 16px;
+  opacity: 0;
+  transform: translateY(24px);
+}
+.nameVisible .name {
+  animation: fadeUp 0.6s ease 0.15s forwards;
 }
 .tagline {
   font-size: 15px;
   color: var(--bark-mid);
   margin-bottom: 16px;
   font-weight: 300;
+  opacity: 0;
+  transform: translateY(12px);
+}
+.nameVisible .tagline {
+  animation: fadeUp 0.5s ease 0.3s forwards;
 }
 .contactRow {
   display: flex;
@@ -76,6 +96,11 @@
   font-size: 13px;
   color: var(--bark-light);
   flex-wrap: wrap;
+  opacity: 0;
+  transform: translateY(12px);
+}
+.nameVisible .contactRow {
+  animation: fadeUp 0.5s ease 0.35s forwards;
 }
 .contactLink {
   color: var(--terracotta);
@@ -84,6 +109,27 @@
 }
 .contactLink:hover { color: var(--bark); }
 .dot { color: var(--sand-dark); }
+
+/* Name underline flourish */
+.nameUnderline {
+  position: relative;
+  display: inline-block;
+}
+.nameUnderline::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  height: 2px;
+  width: 100%;
+  background: var(--terracotta);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.5s ease 0.7s;
+}
+.nameVisible .nameUnderline::after {
+  transform: scaleX(1);
+}
 
 /* Stats */
 .statsGrid {
@@ -96,16 +142,25 @@
   border-radius: 12px;
   padding: 16px 20px;
   min-width: 120px;
-  animation: fadeUp 0.6s ease both;
+  border-left: 3px solid var(--terracotta);
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.5s ease, transform 0.5s ease, box-shadow 0.2s ease;
+  transition-delay: var(--delay, 0s);
+  cursor: default;
 }
-.statCard:nth-child(1) { animation-delay: 0.1s; }
-.statCard:nth-child(2) { animation-delay: 0.2s; }
-.statCard:nth-child(3) { animation-delay: 0.3s; }
-.statCard:nth-child(4) { animation-delay: 0.4s; }
+.statCard.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.statCard:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(196, 96, 58, 0.12);
+}
 .statValue {
   display: block;
   font-family: var(--font-display);
-  font-size: 26px;
+  font-size: 32px;
   font-weight: 700;
   color: var(--terracotta);
   line-height: 1;
@@ -150,20 +205,21 @@
   top: 8px;
   bottom: 0;
   width: 1px;
-  background: var(--sand);
+  background: linear-gradient(to bottom, var(--terracotta), var(--sand));
 }
 .timelineItem {
   display: flex;
   gap: 28px;
   margin-bottom: 40px;
-  animation: fadeUp 0.5s ease both;
+  opacity: 0;
+  transform: translateX(-12px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  transition-delay: var(--delay, 0s);
 }
-.timelineItem:nth-child(1) { animation-delay: 0.1s; }
-.timelineItem:nth-child(2) { animation-delay: 0.2s; }
-.timelineItem:nth-child(3) { animation-delay: 0.3s; }
-.timelineItem:nth-child(4) { animation-delay: 0.4s; }
-.timelineItem:nth-child(5) { animation-delay: 0.5s; }
-.timelineItem:nth-child(6) { animation-delay: 0.6s; }
+.timelineItem.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
 .timelineDot {
   flex-shrink: 0;
   width: 9px;
@@ -173,6 +229,11 @@
   margin-top: 6px;
   position: relative;
   left: -4px;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+.timelineItem:hover .timelineDot {
+  transform: scale(1.6);
+  background: var(--terracotta-light);
 }
 .timelineContent { flex: 1; }
 .period {
@@ -191,6 +252,9 @@
   color: var(--bark);
   margin-bottom: 2px;
   line-height: 1.3;
+}
+.roleTitleCurrent {
+  font-weight: 700;
 }
 .company {
   font-size: 13px;
@@ -226,11 +290,21 @@
   border: 1px solid var(--sand);
   border-radius: 16px;
   padding: 24px;
-  animation: fadeUp 0.5s ease both;
+  box-shadow: 0 2px 8px rgba(61, 43, 31, 0.04);
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.5s ease, transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  transition-delay: var(--delay, 0s);
 }
-.sideCard:nth-child(1) { animation-delay: 0.15s; }
-.sideCard:nth-child(2) { animation-delay: 0.25s; }
-.sideCard:nth-child(3) { animation-delay: 0.35s; }
+.sideCard.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.sideCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(61, 43, 31, 0.08);
+  border-color: var(--sand-dark);
+}
 .sideTitle {
   font-family: var(--font-display);
   font-size: 11px;
@@ -254,9 +328,9 @@
 }
 .sideBadge {
   display: inline-block;
-  background: var(--sage-light);
+  background: #a8cfc0;
   color: var(--sage);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
   padding: 3px 10px;
   border-radius: 20px;
@@ -274,6 +348,20 @@
   padding: 4px 10px;
   border-radius: 20px;
   font-weight: 400;
+  opacity: 0;
+  transform: translateY(8px) scale(0.95);
+  transition: opacity 0.3s ease, transform 0.3s ease, background 0.15s ease, color 0.15s ease;
+  transition-delay: calc(var(--pill-index, 0) * 0.05s);
+  cursor: default;
+}
+.skillPills.visible .pill {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+.pill:hover {
+  background: var(--terracotta);
+  color: var(--warm-white);
+  transform: translateY(-2px);
 }
 .visibilityList {
   list-style: none;
@@ -289,9 +377,13 @@
   from { opacity: 0; transform: translateY(16px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-@keyframes bounce {
-  0%, 80%, 100% { transform: translateY(0); }
-  40%           { transform: translateY(-6px); }
+@keyframes drift1 {
+  0%, 100% { transform: translate(0, 0); }
+  50%       { transform: translate(-20px, 15px); }
+}
+@keyframes drift2 {
+  0%, 100% { transform: translate(0, 0); }
+  50%       { transform: translate(15px, -20px); }
 }
 
 /* Responsive */

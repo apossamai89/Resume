@@ -1,5 +1,8 @@
 "use client";
+import { useEffect, useState } from "react";
 import styles from "./page.module.css";
+import { useInView } from "./hooks/useInView";
+import { useCountUp } from "./hooks/useCountUp";
 
 const ROLES = [
   {
@@ -70,14 +73,92 @@ const SKILLS = [
   "ChatGPT / Claude / Gemini",
 ];
 
-const STATS = [
-  { value: "$45M+", label: "Influenced bookings" },
-  { value: "8+", label: "Years in ABM" },
-  { value: "1,500+", label: "Target accounts scaled" },
-  { value: "898%", label: "YoY revenue growth" },
+// prefix, numeric value, suffix
+const STATS: { prefix: string; value: number; suffix: string; label: string }[] = [
+  { prefix: "$", value: 45, suffix: "M+", label: "Influenced bookings" },
+  { prefix: "", value: 8, suffix: "+", label: "Years in ABM" },
+  { prefix: "", value: 1500, suffix: "+", label: "Target accounts scaled" },
+  { prefix: "", value: 898, suffix: "%", label: "YoY revenue growth" },
 ];
 
+function StatCard({ stat, index, gridVisible }: { stat: typeof STATS[0]; index: number; gridVisible: boolean }) {
+  const count = useCountUp(stat.value, 1200, gridVisible);
+  const display = gridVisible ? count : 0;
+  return (
+    <div
+      className={`${styles.statCard} ${gridVisible ? styles.visible : ""}`}
+      style={{ "--delay": `${index * 0.1}s` } as React.CSSProperties}
+    >
+      <span className={styles.statValue}>
+        {stat.prefix}{display}{stat.suffix}
+      </span>
+      <span className={styles.statLabel}>{stat.label}</span>
+    </div>
+  );
+}
+
+function TimelineItem({ role, index }: { role: typeof ROLES[0]; index: number }) {
+  const [ref, isVisible] = useInView(0.15);
+  return (
+    <div
+      ref={ref}
+      className={`${styles.timelineItem} ${isVisible ? styles.visible : ""}`}
+      style={{ "--delay": `${index * 0.08}s` } as React.CSSProperties}
+    >
+      <div className={styles.timelineDot} />
+      <div className={styles.timelineContent}>
+        <span className={styles.period}>{role.period}</span>
+        <h3 className={`${styles.roleTitle} ${index === 0 ? styles.roleTitleCurrent : ""}`}>{role.title}</h3>
+        <p className={styles.company}>{role.company}</p>
+        <ul className={styles.bullets}>
+          {role.bullets.map((b, j) => (
+            <li key={j}>{b}</li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+}
+
+function SideCard({ children, index }: { children: React.ReactNode; index: number }) {
+  const [ref, isVisible] = useInView(0.1);
+  return (
+    <div
+      ref={ref}
+      className={`${styles.sideCard} ${isVisible ? styles.visible : ""}`}
+      style={{ "--delay": `${index * 0.1}s` } as React.CSSProperties}
+    >
+      {children}
+    </div>
+  );
+}
+
+function SkillPills() {
+  const [ref, isVisible] = useInView(0.1);
+  return (
+    <div ref={ref} className={`${styles.skillPills} ${isVisible ? styles.visible : ""}`}>
+      {SKILLS.map((s, i) => (
+        <span
+          key={s}
+          className={styles.pill}
+          style={{ "--pill-index": i } as React.CSSProperties}
+        >
+          {s}
+        </span>
+      ))}
+    </div>
+  );
+}
+
 export default function Home() {
+  const [nameVisible, setNameVisible] = useState(false);
+  const [statsRef, statsVisible] = useInView(0.1);
+
+  useEffect(() => {
+    const t = setTimeout(() => setNameVisible(true), 100);
+    return () => clearTimeout(t);
+  }, []);
+
   return (
     <main className={styles.main}>
       <div className={styles.bgCircle1} />
@@ -85,9 +166,12 @@ export default function Home() {
 
       <header className={styles.header}>
         <div className={styles.headerInner}>
-          <div className={styles.nameBlock}>
+          <div className={`${styles.nameBlock} ${nameVisible ? styles.nameVisible : ""}`}>
             <p className={styles.eyebrow}>Portfolio</p>
-            <h1 className={styles.name}>Alessandra<br />Possamai</h1>
+            <h1 className={styles.name}>
+              Alessandra<br />
+              <span className={styles.nameUnderline}>Possamai</span>
+            </h1>
             <p className={styles.tagline}>
               ABM leader · 8+ years · $45M+ influenced bookings
             </p>
@@ -100,12 +184,9 @@ export default function Home() {
             </div>
           </div>
 
-          <div className={styles.statsGrid}>
-            {STATS.map((s) => (
-              <div key={s.label} className={styles.statCard}>
-                <span className={styles.statValue}>{s.value}</span>
-                <span className={styles.statLabel}>{s.label}</span>
-              </div>
+          <div ref={statsRef} className={styles.statsGrid}>
+            {STATS.map((s, i) => (
+              <StatCard key={s.label} stat={s} index={i} gridVisible={statsVisible} />
             ))}
           </div>
         </div>
@@ -116,41 +197,25 @@ export default function Home() {
           <h2 className={styles.sectionTitle}>Experience</h2>
           <div className={styles.timeline}>
             {ROLES.map((role, i) => (
-              <div key={i} className={styles.timelineItem}>
-                <div className={styles.timelineDot} />
-                <div className={styles.timelineContent}>
-                  <span className={styles.period}>{role.period}</span>
-                  <h3 className={styles.roleTitle}>{role.title}</h3>
-                  <p className={styles.company}>{role.company}</p>
-                  <ul className={styles.bullets}>
-                    {role.bullets.map((b, j) => (
-                      <li key={j}>{b}</li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
+              <TimelineItem key={i} role={role} index={i} />
             ))}
           </div>
         </section>
 
         <aside className={styles.sidebar}>
-          <div className={styles.sideCard}>
+          <SideCard index={0}>
             <h2 className={styles.sideTitle}>Education</h2>
             <p className={styles.sideHeading}>Bachelor of Commerce</p>
             <p className={styles.sideSub}>Rotman Commerce, University of Toronto</p>
             <p className={styles.sideBadge}>Graduated with Distinction</p>
-          </div>
+          </SideCard>
 
-          <div className={styles.sideCard}>
+          <SideCard index={1}>
             <h2 className={styles.sideTitle}>Tools & Skills</h2>
-            <div className={styles.skillPills}>
-              {SKILLS.map((s) => (
-                <span key={s} className={styles.pill}>{s}</span>
-              ))}
-            </div>
-          </div>
+            <SkillPills />
+          </SideCard>
 
-          <div className={styles.sideCard}>
+          <SideCard index={2}>
             <h2 className={styles.sideTitle}>Industry Visibility</h2>
             <ul className={styles.visibilityList}>
               <li>🎤 Speaker — B2B Marketing Expo</li>
@@ -159,7 +224,7 @@ export default function Home() {
               <li>📰 Cover feature — ABM in Action (Vol. 05, Issue 02)</li>
               <li>🎙 Guest — "Let's Talk ABM" podcast</li>
             </ul>
-          </div>
+          </SideCard>
         </aside>
       </div>
     </main>
